@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using ContactManager.Data;
 using Microsoft.AspNetCore.Authorization;
 using ContactManager.Authorization;
+using ContactManager.Models;
 
 // snippet3 used in next define
-#region snippet4  
-#region snippet2
-#region snippet
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -19,10 +19,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(
-    options => options.SignIn.RequireConfirmedAccount = true)
+    options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
-#endregion
+
 
 builder.Services.AddRazorPages();
 
@@ -32,9 +32,9 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 });
-#endregion
 
-// Authorization handlers.
+
+// Authorization handlers. - Roles
 builder.Services.AddScoped<IAuthorizationHandler,
                       ContactIsOwnerAuthorizationHandler>();
 
@@ -44,22 +44,27 @@ builder.Services.AddSingleton<IAuthorizationHandler,
 builder.Services.AddSingleton<IAuthorizationHandler,
                       ContactManagerAuthorizationHandler>();
 
+builder.Services.AddSingleton<IAuthorizationHandler, ContactCollaboratorAuthorizationHandler>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
-    context.Database.Migrate();
+    context.Database.Migrate();  // Update-Database
     // requires using Microsoft.Extensions.Configuration;
     // Set password with the Secret Manager tool.
     // dotnet user-secrets set SeedUserPW <pw>
-
-    var testUserPw = builder.Configuration.GetValue<string>("SeedUserPW");
-
-   await SeedData.Initialize(services, testUserPw);
+    var userPasswords = new UserPasswords()
+    {
+        AdminPassword = builder.Configuration.GetValue<string>("AdminPW"),
+        ManagerPassword = builder.Configuration.GetValue<string>("ManagerPW"),
+        CollaboratorPassword = builder.Configuration.GetValue<string>("CollaboratorPW")
+    };
+    await SeedData.Initialize(services, userPasswords);
 }
-#endregion
+
 
 if (app.Environment.IsDevelopment())
 {

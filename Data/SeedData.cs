@@ -10,7 +10,7 @@ namespace ContactManager.Data
     {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
         #region snippet_Initialize
-        public static async Task Initialize(IServiceProvider serviceProvider, string testUserPw)
+        public static async Task Initialize(IServiceProvider serviceProvider, UserPasswords userPasswords)
         {
             using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
@@ -20,12 +20,15 @@ namespace ContactManager.Data
                 // dotnet user-secrets set SeedUserPW <pw>
                 // The admin user can do anything
 
-                var adminID = await EnsureUser(serviceProvider, testUserPw, "admin@contoso.com");
+                var adminID = await EnsureUser(serviceProvider, userPasswords.AdminPassword, "admin@contoso.com");
                 await EnsureRole(serviceProvider, adminID, Constants.ContactAdministratorsRole);
 
                 // allowed user can create and edit contacts that they create
-                var managerID = await EnsureUser(serviceProvider, testUserPw, "manager@contoso.com");
+                var managerID = await EnsureUser(serviceProvider, userPasswords.ManagerPassword, "manager@contoso.com");
                 await EnsureRole(serviceProvider, managerID, Constants.ContactManagersRole);
+
+                var collaboratorID = await EnsureUser(serviceProvider, userPasswords.CollaboratorPassword, "collab@contoso.com");
+                await EnsureRole(serviceProvider, collaboratorID, Constants.ContactCollaboratorsRole);
 
                 SeedDB(context, adminID);
             }

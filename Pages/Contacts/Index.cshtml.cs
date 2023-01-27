@@ -25,6 +25,7 @@ namespace ContactManager.Pages.Contacts
         {
             var contacts = from c in Context.Contact
                            select c;
+            //var isAuthenticated = false; // .... to authenticate the user _ NOOOOOOTTT NEEDED cause of FallBackPolicy
 
             var isAuthorized = User.IsInRole(Constants.ContactManagersRole) ||
                                User.IsInRole(Constants.ContactAdministratorsRole);
