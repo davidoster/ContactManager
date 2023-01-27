@@ -7,6 +7,7 @@ using ContactManager.Data;
 using Microsoft.AspNetCore.Authorization;
 using ContactManager.Authorization;
 using ContactManager.Models;
+using Microsoft.AspNetCore.Authentication;
 
 // snippet3 used in next define
 
@@ -23,6 +24,13 @@ builder.Services.AddDefaultIdentity<IdentityUser>(
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddAuthentication()
+    .AddIdentityServerJwt();
+
+builder.Services.AddIdentityServer()
+    .AddApiAuthorization<IdentityUser, ApplicationDbContext>();
+
+
 
 builder.Services.AddRazorPages();
 
@@ -33,6 +41,7 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
+builder.Services.AddControllers();
 
 // Authorization handlers. - Roles
 builder.Services.AddScoped<IAuthorizationHandler,
@@ -81,11 +90,13 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapDefaultControllerRoute();
 
 app.Run();
 #elif ALT

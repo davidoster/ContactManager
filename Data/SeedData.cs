@@ -1,5 +1,6 @@
 ﻿using ContactManager.Authorization;
 using ContactManager.Models;
+using Duende.IdentityServer.EntityFramework.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,26 +13,24 @@ namespace ContactManager.Data
         #region snippet_Initialize
         public static async Task Initialize(IServiceProvider serviceProvider, UserPasswords userPasswords)
         {
-            using (var context = new ApplicationDbContext(
-                serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
-            {
-                // For sample purposes seed both with the same password.
-                // Password is set with the following:
-                // dotnet user-secrets set SeedUserPW <pw>
-                // The admin user can do anything
+            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            // For sample purposes seed both with the same password.
+            // Password is set with the following:
+            // dotnet user-secrets set SeedUserPW <pw>
+            // The admin user can do anything
 
-                var adminID = await EnsureUser(serviceProvider, userPasswords.AdminPassword, "admin@contoso.com");
-                await EnsureRole(serviceProvider, adminID, Constants.ContactAdministratorsRole);
+            var adminID = await EnsureUser(serviceProvider, userPasswords.AdminPassword, "admin@contoso.com");
+            await EnsureRole(serviceProvider, adminID, Constants.ContactAdministratorsRole);
 
-                // allowed user can create and edit contacts that they create
-                var managerID = await EnsureUser(serviceProvider, userPasswords.ManagerPassword, "manager@contoso.com");
-                await EnsureRole(serviceProvider, managerID, Constants.ContactManagersRole);
+            // allowed user can create and edit contacts that they create
+            var managerID = await EnsureUser(serviceProvider, userPasswords.ManagerPassword, "manager@contoso.com");
+            await EnsureRole(serviceProvider, managerID, Constants.ContactManagersRole);
 
-                var collaboratorID = await EnsureUser(serviceProvider, userPasswords.CollaboratorPassword, "collab@contoso.com");
-                await EnsureRole(serviceProvider, collaboratorID, Constants.ContactCollaboratorsRole);
+            var collaboratorID = await EnsureUser(serviceProvider, userPasswords.CollaboratorPassword, "collab@contoso.com");
+            await EnsureRole(serviceProvider, collaboratorID, Constants.ContactCollaboratorsRole);
 
-                SeedDB(context, adminID);
-            }
+            SeedDB(context, adminID);
+
         }
 
         private static async Task<string> EnsureUser(IServiceProvider serviceProvider,
