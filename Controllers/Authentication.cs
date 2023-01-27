@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ContactManager.Controllers
@@ -8,12 +9,19 @@ namespace ContactManager.Controllers
     [ApiController]
     public class Authentication : ControllerBase
     {
+        private SignInManager<IdentityUser> _signInManager;
+        public Authentication(SignInManager<IdentityUser> signInManager)
+        {
+            _signInManager = signInManager;
+        }
+
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult Authenticate([FromBody]UserDetails user)
+        public async Task<IActionResult> Authenticate([FromBody]UserDetails user)
         {
             var credentials = new { user.Username, user.Password };
-            return Ok(credentials);
+            var result = await _signInManager.PasswordSignInAsync(user.Username, user.Password, true, lockoutOnFailure: false);
+            return Ok(result);
         }
     }
 
