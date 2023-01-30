@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ContactManager.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ContactsController : ControllerBase
