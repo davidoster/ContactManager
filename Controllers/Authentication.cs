@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace ContactManager.Controllers
 {
@@ -19,24 +21,25 @@ namespace ContactManager.Controllers
         [HttpPost]
         [AllowAnonymous]
         // acts like a login
-        public async Task<IActionResult> Login([FromBody]UserDetails user)
+        public async Task<IActionResult> Login([FromBody] UserDetails user)
         {
             var credentials = new { user.Username, user.Password };
             var result = await _signInManager.PasswordSignInAsync(user.Username, user.Password, true, lockoutOnFailure: false);
+            // return the token for this user
             return Ok(result);
-        }
+}
 
-        [HttpGet("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            return Ok(new { message = "Logged out succesfully" });
-        }
+[HttpGet("logout")]
+public async Task<IActionResult> Logout()
+{
+    await _signInManager.SignOutAsync();
+    return Ok(new { message = "Logged out succesfully" });
+}
     }
 
     public class UserDetails
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
-    }
+{
+    public string Username { get; set; }
+    public string Password { get; set; }
+}
 }

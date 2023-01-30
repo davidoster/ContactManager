@@ -56,6 +56,19 @@ builder.Services.AddSingleton<IAuthorizationHandler,
 
 builder.Services.AddSingleton<IAuthorizationHandler, ContactCollaboratorAuthorizationHandler>();
 
+var origins = new string[] {"https://localhost:3000", "http://localhost:3000"};
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.WithOrigins(origins) // note the port is included 
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -91,9 +104,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
+app.UseCors("AllowAll");
 app.UseAuthentication();
-
+app.UseIdentityServer();
 app.UseAuthorization();
 
 app.MapRazorPages();
